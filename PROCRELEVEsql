@@ -1,0 +1,131 @@
+CREATE OR REPLACE PROCEDURE PROCRELEVE IS BEGIN
+    DECLARE
+        CURSOR selectReleve(mat ETUDIANT.MATRICULE%TYPE) IS 
+            SELECT
+                UE.CODEUE,
+                UE.LIBELLE,
+                UE.CREDIT,
+                NOTES.VALEUR,
+                VUEQUOTAS.MENTION,
+                NOTES.SEMESTRE,
+                VUEQUOTAS.DECISION
+            FROM
+                UE,
+                NOTES,
+                VUEQUOTAS,
+                ADMIS
+            WHERE
+                NOTES.CODEUE = UE.CODEUE
+            AND
+                NOTES.VALEUR >= VUEQUOTAS.VALINF
+            AND
+                NOTES.VALEUR <= VUEQUOTAS.VALSUP
+            AND
+                NOTES.IDET = ADMIS.IDET
+            AND
+                ADMIS.IDET = mat
+            ORDER BY CODEUE;
+            
+            CURSOR selectinfo(mat ETUDIANT.MATRICULE%TYPE) IS
+                SELECT 
+                NOM,
+                PRENOM,
+                MATRICULE,
+                DATENAIS,
+                LIEUNAIS
+                FROM
+                    ETUDIANT,
+                    ADMIS
+                WHERE
+                    ETUDIANT.MATRICULE = ADMIS.IDET AND ADMIS.IDET = mat;
+                    
+            CURSOR selectmgp(mat ETUDIANT.MATRICULE%TYPE) IS 
+                SELECT
+                    MGP.VALEUR
+                FROM
+                    ETUDIANT,
+                    ADMIS,
+                    MGP
+                WHERE
+                    ETUDIANT.MATRICULE = MGP.MATET
+                    AND
+                        MGP.MATET = ADMIS.IDET
+                    AND ADMIS.IDET = mat;
+                    
+            CURSOR selectEtudiant IS
+                SELECT 
+                    ADMIS.IDET
+                FROM
+                    ADMIS,
+                    ETUDIANT
+                WHERE
+                    ADMIS.IDET = ETUDIANT.MATRICULE;
+            
+        codeue UE.CODEUE%TYPE;
+        libelle UE.LIBELLE%TYPE;
+        credit UE.CREDIT%TYPE;
+        valeur NOTES.VALEUR%TYPE;
+        mention VUEQUOTAS.MENTION%TYPE;
+        semestre NOTES.SEMESTRE%TYPE;
+        dateNais ETUDIANT.DATENAIS%TYPE;
+        lieuNais ETUDIANT.LIEUNAIS%TYPE;
+        nom ETUDIANT.NOM%TYPE;
+        prenom ETUDIANT.PRENOM%TYPE;
+        matri ETUDIANT.MATRICULE%TYPE;
+        matricule ETUDIANT.MATRICULE%TYPE;
+        decision VUEQUOTAS.DECISION%TYPE;
+        mgp FLOAT;
+        
+    BEGIN
+        OPEN selectEtudiant;
+        LOOP
+            FETCH selectEtudiant INTO matricule;
+            EXIT WHEN selectEtudiant%NOTFOUND;
+            OPEN selectinfo(matricule);
+                FETCH selectinfo INTO nom, prenom, matri, dateNais, lieuNais;
+                DBMS_OUTPUT.PUT_LINE(' ');
+                DBMS_OUTPUT.PUT_LINE(' ');
+                DBMS_OUTPUT.PUT_LINE(' ');
+                DBMS_OUTPUT.PUT_LINE('.                                                 RELEVE DE NOTES');
+                DBMS_OUTPUT.PUT_LINE(' ');
+                DBMS_OUTPUT.PUT_LINE('Noms et Prénoms : ' || nom || ' ' || prenom || '                    Matricule : ' || matri);
+                DBMS_OUTPUT.PUT_LINE('Né(e) le : ' || DateNais || '                    A : ' || lieuNais);
+                DBMS_OUTPUT.PUT_LINE('Domaine :     SCIENCES MATHEMATIQUES ET INFORMATIQUES');
+                DBMS_OUTPUT.PUT_LINE('Niveau :  LICENCE II          Filière : INFORMATION AND COMMUNICATION TECHNOLOGY FOR DEVELOPMENT');
+                DBMS_OUTPUT.PUT_LINE(' ');
+            CLOSE selectinfo;
+                DBMS_OUTPUT.PUT_LINE('||=======|===========================================================|=======|=======|========|========|=========|========||');
+                DBMS_OUTPUT.PUT_LINE('||Code UE|                   INTITULE DE L UE/UE Title               |Crédit |  Moy  |Mention |Semestre|  Année  |Décision||');
+                DBMS_OUTPUT.PUT_LINE('||=======|===========================================================|=======|=======|========|========|=========|========||');
+        OPEN selectReleve(matricule);
+            LOOP
+                FETCH selectReleve INTO codeue, libelle, credit, valeur, mention, semestre, decision;
+                EXIT WHEN selectReleve%NOTFOUND;
+                DBMS_OUTPUT.PUT_LINE('| ' || codeue || ' | ' || libelle || ' |   ' || credit || '   |  ' || valeur || '   |   ' || mention || '   |   ' || semestre || '    |  ' || ' 2021 ' || ' |  ' || decision||'  |');
+                DBMS_OUTPUT.PUT_LINE('|--------------------------------------------------------------------------------------------------------------------------|');
+            END LOOP;
+        CLOSE selectReleve;
+        OPEN selectmgp(matricule);
+            FETCH selectmgp INTO mgp;
+                DBMS_OUTPUT.PUT_LINE('.                                      Crédits Capitalisés : 60/60 (100,00%)');
+                DBMS_OUTPUT.PUT_LINE('.                                      Moyenne Générale Pondérée (MGP) : ' || mgp || ' / 4');
+                DBMS_OUTPUT.PUT_LINE('                                       Décision : ADMIS');
+                DBMS_OUTPUT.PUT_LINE(' ');
+                DBMS_OUTPUT.PUT_LINE(' ');
+                DBMS_OUTPUT.PUT_LINE(' ');
+                DBMS_OUTPUT.PUT_LINE(' ');
+                DBMS_OUTPUT.PUT_LINE(' ');
+                DBMS_OUTPUT.PUT_LINE(' ');
+                DBMS_OUTPUT.PUT_LINE('Le Président du Jury                                                                                   Yaoundé, le...........');
+                DBMS_OUTPUT.PUT_LINE('.                                                                                                      Le Chef de Département ');
+            CLOSE selectmgp;
+                DBMS_OUTPUT.PUT_LINE(' ');
+                DBMS_OUTPUT.PUT_LINE(' ');
+                DBMS_OUTPUT.PUT_LINE(' ');
+                DBMS_OUTPUT.PUT_LINE('================================================================================================================================');
+        END LOOP;
+        CLOSE selectEtudiant;
+    END;
+END PROCRELEVE;
+
+        

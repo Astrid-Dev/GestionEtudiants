@@ -1,0 +1,49 @@
+CREATE OR REPLACE PROCEDURE PROCREDOUBLANTS IS BEGIN
+    
+    DECLARE
+        
+        CURSOR listeredoublants IS
+            SELECT
+                ETUDIANT.NOM,
+                ETUDIANT.PRENOM,
+                ETUDIANT.MATRICULE,
+                MGP.VALEUR
+            FROM
+                ETUDIANT,
+                REDOUBLANT,
+                MGP
+            WHERE 
+                ETUDIANT.MATRICULE = REDOUBLANT.IDET
+            AND
+                ETUDIANT.MATRICULE = MGP.MATET
+            AND
+                MGP.VALEUR < 2;
+                
+        nom ETUDIANT.NOM%TYPE;
+        prenom ETUDIANT.PRENOM%TYPE;
+        mat ETUDIANT.MATRICULE%TYPE;
+        mgp FLOAT;
+        
+        i INTEGER := 1;
+        
+    BEGIN
+        
+         OPEN listeredoublants;
+        DBMS_OUTPUT.PUT_LINE('.                        LISTE DES REDOUBLANTS');
+        DBMS_OUTPUT.PUT_LINE(' ');
+        DBMS_OUTPUT.PUT_LINE('FILIERE : ICT - INFORMATION AND COMMUNICATION TECHNOLOGY FOR DEVELOPMENT');
+        DBMS_OUTPUT.PUT_LINE('.              GRADE : L2  SEMESTRE : Tous Année académique 2020-2020');
+        DBMS_OUTPUT.PUT_LINE(' ');
+        DBMS_OUTPUT.PUT_LINE('|===|=================|===========|======|========|');
+        DBMS_OUTPUT.PUT_LINE('|Num| NOMS ET PRENOMS | MATRICULE | MGP  |   DEC  |');
+        DBMS_OUTPUT.PUT_LINE('|===|=================|===========|======|========|');
+        LOOP
+            FETCH listeredoublants INTO nom, prenom, mat, mgp;
+            EXIT WHEN listeredoublants%NOTFOUND;
+            DBMS_OUTPUT.PUT_LINE('| ' || i || ' | ' || nom || ' ' || prenom || ' | ' || mat ||  '   | ' || mgp || ' | ' || ' ECHEC |');
+            DBMS_OUTPUT.PUT_LINE('|---|-----------------|-----------|------|--------|');
+            i := i+1;
+            END LOOP;
+            CLOSE listeredoublants;
+    END;
+END PROCREDOUBLANTS;

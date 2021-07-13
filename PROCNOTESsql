@@ -1,0 +1,56 @@
+CREATE OR REPLACE PROCEDURE PROCNOTES IS BEGIN
+    DECLARE
+        CURSOR selectNotes IS
+            SELECT
+                ETUDIANT.MATRICULE,
+                ETUDIANT.NOM,
+                ETUDIANT.PRENOM,
+                NOTES.CODEUE,
+                NOTES.VALEUR,
+                VUEQUOTAS.MENTION,
+                VUEQUOTAS.DECISION
+            FROM
+                ETUDIANT,
+                NOTES,
+                VUEQUOTAS
+            WHERE
+                NOTES.IDET = ETUDIANT.MATRICULE
+            AND
+                NOTES.VALEUR != -1
+            AND 
+                NOTES.VALEUR >= VUEQUOTAS.VALINF
+            AND
+                NOTES.VALEUR <= VUEQUOTAS.VALSUP
+            ORDER BY CODEUE, ETUDIANT.NOM ASC;
+        
+        matricule VARCHAR2(7);
+        nom VARCHAR2(30);
+        prenom VARCHAR2(30);
+        codeue VARCHAR2(6);
+        codeue1 VARCHAR2(6) := '      ';
+        valeur FLOAT;
+        mention VARCHAR2(2);
+        decision VARCHAR2(6);
+        i INTEGER := 0;
+        a INTEGER := 0;
+        
+    BEGIN
+         OPEN selectNotes;
+      LOOP  
+            FETCH selectNotes INTO matricule, nom, prenom, codeue, valeur, mention, decision;
+            IF codeue != codeue1 THEN
+                DBMS_OUTPUT.PUT_LINE(' ');
+                DBMS_OUTPUT.PUT_LINE('.                        LISTE DES NOTES DE ' || UPPER(codeue));
+                DBMS_OUTPUT.PUT_LINE(' ');
+                DBMS_OUTPUT.PUT_LINE('|=========|===================|============|========|=======|===========|');
+                DBMS_OUTPUT.PUT_LINE('|MATRICULE' || '| ' || ' NOMS ET PRENOMS' || '  | ' || ' CODE UE   ' || '| ' || 'VALEUR' || ' |MENTION|' || '  DECISION |');
+                DBMS_OUTPUT.PUT_LINE('|=========|===================|============|========|=======|===========|');
+            END IF;
+            EXIT WHEN selectNotes%NOTFOUND;
+            codeue1 := codeue;
+            DBMS_OUTPUT.PUT_LINE('|' || matricule || '  |  '|| nom || ' ' || prenom || '  |  ' || codeue || '    |  ' || valeur  || '    | '|| mention || '    |    ' || decision || '  |');
+            DBMS_OUTPUT.PUT_LINE('|-----------------------------------------------------------------------|');
+    END LOOP;
+            CLOSE selectNotes;   
+    END;
+END PROCNOTES;

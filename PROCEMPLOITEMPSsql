@@ -1,0 +1,121 @@
+CREATE OR REPLACE PROCEDURE PROCEMPLOITEMPS IS BEGIN
+    DECLARE
+        
+        CURSOR temps1 IS
+             SELECT
+                EMPLOIDETEMPS.HEURE,
+                EMPLOIDETEMPS.CODEUE,
+                ENSEIGNANT.NOM,
+                ENSEIGNANT.PRENOM 
+            FROM
+                EMPLOIDETEMPS,
+                ENSEIGNANT
+            WHERE
+                EMPLOIDETEMPS.IDENS = ENSEIGNANT.IDENS
+            AND JOUR = 'Lundi'
+            ORDER BY HEURE;
+         CURSOR temps2 IS
+             SELECT
+                EMPLOIDETEMPS.HEURE,
+                EMPLOIDETEMPS.CODEUE,
+                ENSEIGNANT.NOM,
+                ENSEIGNANT.PRENOM 
+            FROM
+                EMPLOIDETEMPS,
+                ENSEIGNANT
+            WHERE
+                EMPLOIDETEMPS.IDENS = ENSEIGNANT.IDENS
+            AND JOUR = 'Mardi'
+            ORDER BY HEURE;
+            
+             CURSOR temps3 IS
+             SELECT
+                 EMPLOIDETEMPS.HEURE,
+                EMPLOIDETEMPS.CODEUE,
+                ENSEIGNANT.NOM,
+                ENSEIGNANT.PRENOM 
+            FROM
+                EMPLOIDETEMPS,
+                ENSEIGNANT
+            WHERE
+                EMPLOIDETEMPS.IDENS = ENSEIGNANT.IDENS
+            AND JOUR = 'Mercredi'
+            ORDER BY HEURE;
+            
+             CURSOR temps4 IS
+             SELECT
+                 EMPLOIDETEMPS.HEURE,
+                EMPLOIDETEMPS.CODEUE,
+                ENSEIGNANT.NOM,
+                ENSEIGNANT.PRENOM 
+            FROM
+                EMPLOIDETEMPS,
+                ENSEIGNANT
+            WHERE
+                EMPLOIDETEMPS.IDENS = ENSEIGNANT.IDENS
+            AND JOUR = 'Jeudi'
+            ORDER BY HEURE;
+            
+             CURSOR temps5 IS
+             SELECT
+              EMPLOIDETEMPS.HEURE,
+                EMPLOIDETEMPS.CODEUE,
+                ENSEIGNANT.NOM,
+                ENSEIGNANT.PRENOM 
+            FROM
+                EMPLOIDETEMPS,
+                ENSEIGNANT
+            WHERE
+                EMPLOIDETEMPS.IDENS = ENSEIGNANT.IDENS
+            AND JOUR = 'Vendredi'
+            ORDER BY HEURE;
+            
+            TYPE enreg IS RECORD(
+                heure EMPLOIDETEMPS.HEURE%TYPE,
+                codeue UE.CODEUE%TYPE,
+                nom ENSEIGNANT.NOM%TYPE,
+                prenom ENSEIGNANT.PRENOM%TYPE);
+                
+            rec1 enreg;
+            rec2 enreg;
+            rec3 enreg; 
+            rec4 enreg;
+            rec5 enreg;
+            
+    BEGIN
+        
+        OPEN temps1;
+        OPEN temps2;
+        OPEN temps3;
+        OPEN temps4;
+        OPEN temps5;
+        
+        DBMS_OUTPUT.PUT_LINE('.                                         EMPLOI DE TEMPS ICTL2(SEMESTRE I)');
+        DBMS_OUTPUT.PUT_LINE('                                         ----------------------------------');
+        DBMS_OUTPUT.PUT_LINE(' ');
+        DBMS_OUTPUT.PUT_LINE(' ');
+        DBMS_OUTPUT.PUT_LINE('||=========|=====================|=====================|=====================|=====================|=====================|');
+        DBMS_OUTPUT.PUT_LINE('| HORAIRES |        LUNDI        |         MARDI       |       MERCREDI      |        JEUDI        |      VENDREDI       |');
+        DBMS_OUTPUT.PUT_LINE('|==========|=====================|=====================|=====================|=====================|=====================|');
+        LOOP
+            FETCH temps1 INTO rec1;
+            FETCH temps2 INTO rec2;
+            FETCH temps3 INTO rec3;
+            FETCH temps4 INTO rec4;
+            FETCH temps5 INTO rec5;
+            
+            EXIT WHEN temps3%NOTFOUND OR temps2%NOTFOUND OR temps3%NOTFOUND OR temps4%NOTFOUND OR temps5%NOTFOUND;
+            DBMS_OUTPUT.PUT_LINE('|          |       ' || rec1.codeue || '        |       ' || rec2.codeue || '        |       ' || rec3.codeue || '        |       ' || rec4.codeue || '        |       ' || rec5.codeue || '        |');
+            DBMS_OUTPUT.PUT_LINE(rec1.heure || '|                     |                     |                     |                     |                     |');
+            DBMS_OUTPUT.PUT_LINE('           |' || rec1.nom ||' '|| rec1.prenom || '|' || rec2.nom ||' '|| rec2.prenom || '|' || rec3.nom ||' '|| rec3.prenom || '|' || rec4.nom ||' '|| rec4.prenom || '|' || rec5.nom ||' '|| rec5.prenom || '|');
+            DBMS_OUTPUT.PUT_LINE('|----------|---------------------|---------------------|---------------------|---------------------|---------------------|');
+            
+        END LOOP;
+        CLOSE temps1;
+        close temps2;
+        CLOSE temps3;
+        CLOSE temps4;
+        CLOSE temps5;
+        
+    END;
+END PROCEMPLOITEMPS;

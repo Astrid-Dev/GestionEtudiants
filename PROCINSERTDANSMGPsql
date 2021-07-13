@@ -1,0 +1,54 @@
+CREATE OR REPLACE PROCEDURE PROCINSERT IS BEGIN
+    
+   DECLARE
+   
+        CURSOR selectMatricule IS
+        SELECT MATRICULE FROM ETUDIANT;
+    
+        CURSOR selectnotesmgp(mat VARCHAR2) IS
+            SELECT
+                SUM(VUEQUOTAS.VALFIN * UE.CREDIT)/60
+            FROM
+                VUEQUOTAS,
+                UE,
+                NOTES,
+                ETUDIANT
+            WHERE
+                NOTES.IDET = ETUDIANT.MATRICULE    
+            AND
+                ETUDIANT.MATRICULE = mat
+            AND
+                UE.CODEUE = NOTES.CODEUE
+            AND
+                NOTES.VALEUR != -1
+            AND 
+                NOTES.VALEUR >= VUEQUOTAS.VALINF
+            AND
+                NOTES.VALEUR <= VUEQUOTAS.VALSUP; 
+            
+        TYPE tabMatricule IS TABLE OF VARCHAR2(7) INDEX BY BINARY_INTEGER;
+        mat VARCHAR2(7);
+        val FLOAT;
+    BEGIN
+        OPEN selectMatricule;
+        LOOP
+        FETCH selectMatricule INTO mat;
+        EXIT WHEN selectMatricule%NOTFOUND;
+            OPEN selectnotesmgp(mat);
+            LOOP
+                FETCH selectnotesmgp INTO val;
+                EXIT WHEN selectnotesmgp%NOTFOUND;
+                INSERT INTO MGP VALUES(mat, ROUND(val, 2));
+                IF(val >= 2) THEN
+                    INSERT INTO ADMIS VALUES(mat);
+                ELSE
+                    INSERT INTO REDOUBLANT VALUES(mat);
+                END IF;
+                
+            END LOOP;
+                CLOSE selectnotesmgp;
+        END LOOP;
+        CLOSE selectMatricule;
+    
+    END;
+END PROCINSERT;

@@ -1,0 +1,44 @@
+CREATE OR REPLACE PROCEDURE PROCADMIS IS BEGIN
+    
+    DECLARE
+        CURSOR listeadmis IS
+            SELECT
+                ETUDIANT.NOM,
+                ETUDIANT.PRENOM,
+                ETUDIANT.MATRICULE,
+                MGP.VALEUR
+            FROM
+                ETUDIANT,
+                ADMIS,
+                MGP
+            WHERE
+                MGP.MATET = ETUDIANT.MATRICULE
+            AND 
+                ETUDIANT.MATRICULE = ADMIS.IDET;
+                
+        nom    ETUDIANT.NOM%TYPE;
+        prenom ETUDIANT.PRENOM%TYPE;
+        mat    ETUDIANT.MATRICULE%TYPE;
+        mgp FLOAT;
+        i NUMBER := 1;
+    BEGIN
+        
+        OPEN listeadmis;
+        DBMS_OUTPUT.PUT_LINE('.                        LISTE DES ADMIS');
+        DBMS_OUTPUT.PUT_LINE(' ');
+        DBMS_OUTPUT.PUT_LINE('FILIERE : ICT - INFORMATION AND COMMUNICATION TECHNOLOGY FOR DEVELOPMENT');
+        DBMS_OUTPUT.PUT_LINE('.              GRADE : L2  SEMESTRE : Tous Année académique 2020-2020');
+        DBMS_OUTPUT.PUT_LINE(' ');
+        DBMS_OUTPUT.PUT_LINE('|===|=================|===========|========|======|========|');
+        DBMS_OUTPUT.PUT_LINE('|Num| NOMS ET PRENOMS | MATRICULE |  %CAP  | MGP  |   DEC  |');
+        DBMS_OUTPUT.PUT_LINE('|===|=================|===========|========|======|========|');
+        LOOP
+            FETCH listeadmis INTO nom, prenom, mat, mgp;
+            EXIT WHEN listeadmis%NOTFOUND;
+            DBMS_OUTPUT.PUT_LINE('| ' || i || ' | ' || nom || ' ' || prenom || ' | ' || mat || '   | 100,00' || ' | ' || mgp || ' | ' || ' ADMIS |');
+            DBMS_OUTPUT.PUT_LINE('|---|-----------------|-----------|--------|------|--------|');
+            i := i+1;
+            END LOOP;
+            CLOSE listeadmis;
+    END;
+END PROCADMIS;
